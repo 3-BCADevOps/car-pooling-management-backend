@@ -22,6 +22,32 @@ mvn spring-boot:run
 
 Server runs on `http://localhost:8080`
 
+## Deploy on Render (with PostgreSQL)
+
+This repository includes a Render Blueprint file at `render.yaml` for one-click deployment.
+
+### Option 1: Blueprint Deploy (recommended)
+
+1. Push your latest backend code to GitHub.
+2. In Render, select **New +** → **Blueprint**.
+3. Connect this repository and deploy.
+
+Render will provision:
+- A web service (`car-pooling-management-backend`)
+- A PostgreSQL database (`carpooling-db`)
+
+### Runtime details
+
+- Build command: `./mvnw clean package -DskipTests`
+- Start command: `java -Dspring.profiles.active=render -jar target/demo-0.0.1-SNAPSHOT.jar`
+
+### Spring profiles
+
+- Local/default: `application.properties` (H2)
+- Render/prod: `application-render.properties` (PostgreSQL)
+
+When deployed via `render.yaml`, Render injects database connection variables used by the `render` profile.
+
 ## API Endpoints
 
 ### Users

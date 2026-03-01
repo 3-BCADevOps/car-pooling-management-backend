@@ -1,0 +1,37 @@
+databases:
+  - name: carpooling-db
+    databaseName: carpooling
+    user: carpooling
+    plan: free
+
+services:
+  - type: web
+    name: car-pooling-management-backend
+    runtime: java
+    plan: free
+    region: oregon
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -Dspring.profiles.active=render -jar target/demo-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 17
+      - key: SPRING_DATASOURCE_HOST
+        fromDatabase:
+          name: carpooling-db
+          property: host
+      - key: SPRING_DATASOURCE_PORT
+        fromDatabase:
+          name: carpooling-db
+          property: port
+      - key: SPRING_DATASOURCE_DB
+        fromDatabase:
+          name: carpooling-db
+          property: database
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: carpooling-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: carpooling-db
+          property: password
