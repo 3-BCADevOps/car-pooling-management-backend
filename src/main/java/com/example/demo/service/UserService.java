@@ -16,6 +16,9 @@ public class UserService {
     private final UserRepository userRepository;
 
     public User createUser(User user) {
+        if (user.getEmail() != null && userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
         return userRepository.save(user);
     }
 
@@ -35,6 +38,10 @@ public class UserService {
             user.setName(userDetails.getName());
         }
         if (userDetails.getEmail() != null) {
+            Optional<User> existingUser = userRepository.findByEmail(userDetails.getEmail());
+            if (existingUser.isPresent() && !existingUser.get().getId().equals(id)) {
+                throw new RuntimeException("Email already exists");
+            }
             user.setEmail(userDetails.getEmail());
         }
         if (userDetails.getPhone() != null) {

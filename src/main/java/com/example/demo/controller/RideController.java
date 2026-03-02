@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/rides")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000"})
 public class RideController {
     private final RideService rideService;
 
@@ -35,34 +35,34 @@ public class RideController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ride> getRideById(@PathVariable Long id) {
+    public ResponseEntity<Ride> getRideById(@PathVariable("id") Long id) {
         return rideService.getRideById(id)
                 .map(ride -> new ResponseEntity<>(ride, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Ride>> getRidesByStatus(@PathVariable RideStatus status) {
+    public ResponseEntity<List<Ride>> getRidesByStatus(@PathVariable("status") RideStatus status) {
         List<Ride> rides = rideService.getRidesByStatus(status);
         return new ResponseEntity<>(rides, HttpStatus.OK);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<Ride>> searchRides(
-            @RequestParam String startingLocation,
-            @RequestParam String destination) {
+            @RequestParam("startingLocation") String startingLocation,
+            @RequestParam("destination") String destination) {
         List<Ride> rides = rideService.getRidesByLocation(startingLocation, destination);
         return new ResponseEntity<>(rides, HttpStatus.OK);
     }
 
     @GetMapping("/driver/{driverId}")
-    public ResponseEntity<List<Ride>> getRidesByDriver(@PathVariable Long driverId) {
+    public ResponseEntity<List<Ride>> getRidesByDriver(@PathVariable("driverId") Long driverId) {
         List<Ride> rides = rideService.getRidesByDriverId(driverId);
         return new ResponseEntity<>(rides, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateRide(@PathVariable Long id, @Valid @RequestBody Ride rideDetails) {
+    public ResponseEntity<?> updateRide(@PathVariable("id") Long id, @Valid @RequestBody Ride rideDetails) {
         try {
             Ride updatedRide = rideService.updateRide(id, rideDetails);
             return new ResponseEntity<>(updatedRide, HttpStatus.OK);
@@ -72,7 +72,7 @@ public class RideController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> updateRideStatus(@PathVariable Long id, @RequestParam RideStatus status) {
+    public ResponseEntity<?> updateRideStatus(@PathVariable("id") Long id, @RequestParam("status") RideStatus status) {
         try {
             rideService.updateRideStatus(id, status);
             return new ResponseEntity<>(java.util.Map.of("message", "Status updated successfully"), HttpStatus.OK);
@@ -82,7 +82,7 @@ public class RideController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRide(@PathVariable Long id) {
+    public ResponseEntity<?> deleteRide(@PathVariable("id") Long id) {
         try {
             rideService.deleteRide(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

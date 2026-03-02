@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/bookings")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000"})
 public class BookingController {
     private final BookingService bookingService;
 
@@ -35,32 +35,32 @@ public class BookingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
+    public ResponseEntity<Booking> getBookingById(@PathVariable("id") Long id) {
         return bookingService.getBookingById(id)
                 .map(booking -> new ResponseEntity<>(booking, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/passenger/{passengerId}")
-    public ResponseEntity<List<Booking>> getBookingsByPassenger(@PathVariable Long passengerId) {
+    public ResponseEntity<List<Booking>> getBookingsByPassenger(@PathVariable("passengerId") Long passengerId) {
         List<Booking> bookings = bookingService.getBookingsByPassengerId(passengerId);
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
     @GetMapping("/ride/{rideId}")
-    public ResponseEntity<List<Booking>> getBookingsByRide(@PathVariable Long rideId) {
+    public ResponseEntity<List<Booking>> getBookingsByRide(@PathVariable("rideId") Long rideId) {
         List<Booking> bookings = bookingService.getBookingsByRideId(rideId);
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Booking>> getBookingsByStatus(@PathVariable BookingStatus status) {
+    public ResponseEntity<List<Booking>> getBookingsByStatus(@PathVariable("status") BookingStatus status) {
         List<Booking> bookings = bookingService.getBookingsByStatus(status);
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateBooking(@PathVariable Long id, @Valid @RequestBody Booking bookingDetails) {
+    public ResponseEntity<?> updateBooking(@PathVariable("id") Long id, @Valid @RequestBody Booking bookingDetails) {
         try {
             Booking updatedBooking = bookingService.updateBooking(id, bookingDetails);
             return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
@@ -70,7 +70,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}/confirm")
-    public ResponseEntity<?> confirmBooking(@PathVariable Long id) {
+    public ResponseEntity<?> confirmBooking(@PathVariable("id") Long id) {
         try {
             bookingService.confirmBooking(id);
             return new ResponseEntity<>(java.util.Map.of("message", "Booking confirmed successfully"), HttpStatus.OK);
@@ -80,7 +80,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<?> cancelBooking(@PathVariable Long id) {
+    public ResponseEntity<?> cancelBooking(@PathVariable("id") Long id) {
         try {
             bookingService.cancelBooking(id);
             return new ResponseEntity<>(java.util.Map.of("message", "Booking cancelled successfully"), HttpStatus.OK);
@@ -90,7 +90,7 @@ public class BookingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteBooking(@PathVariable Long id) {
+    public ResponseEntity<?> deleteBooking(@PathVariable("id") Long id) {
         try {
             bookingService.deleteBooking(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
