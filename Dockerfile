@@ -1,14 +1,15 @@
-# Use Java 17 runtime
-FROM eclipse-temurin:17-jdk-jammy
+# Step 1: Build stage
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
-# Create app directory
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copy jar file
-COPY target/*.jar app.jar
+# Step 2: Run stage
+FROM eclipse-temurin:17-jdk-alpine
 
-# Expose backend port
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
 EXPOSE 8080
-
-# Run the app
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
