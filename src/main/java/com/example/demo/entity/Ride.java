@@ -61,6 +61,13 @@ public class Ride {
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Booking> bookings;
 
+    @PrePersist
+    public void prePersist() {
+        if (this.status == null) {
+            this.status = RideStatus.SCHEDULED;
+        }
+    }
+
     public enum RideStatus {
         SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
     }
