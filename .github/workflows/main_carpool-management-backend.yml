@@ -76,7 +76,7 @@ jobs:
           az webapp config set \
             --resource-group "${RG_NAME}" \
             --name "carpool-management-backend" \
-            --startup-file "java -jar /home/site/wwwroot/app.jar --server.port=\$PORT"
+            --startup-file "java -Dspring.profiles.active=default -jar /home/site/wwwroot/app.jar --server.port=\$PORT"
 
           # Increase allowed startup time for cold starts on constrained plans.
           az webapp config appsettings set \
