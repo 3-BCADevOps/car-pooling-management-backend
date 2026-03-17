@@ -53,6 +53,29 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CD6D3B767D604D449EE14064418E7DAB }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A655CBAEE7D5433EB97A7A976D1944A0 }}
 
+      - name: Configure Azure Web App runtime settings
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          RG_NAME=$(az webapp list --query "[?name=='carpool-management-backend'].resourceGroup | [0]" -o tsv)
+
+          if [ -z "${RG_NAME}" ]; then
+            echo "Could not determine resource group for app carpool-management-backend"
+            exit 1
+          fi
+
+          az webapp config set \
+            --resource-group "${RG_NAME}" \
+            --name "carpool-management-backend" \
+            --startup-file "java -jar /home/site/wwwroot/app.jar --server.port=\$PORT"
+
+          # Increase allowed startup time for cold starts on constrained plans.
+          az webapp config appsettings set \
+            --resource-group "${RG_NAME}" \
+            --name "carpool-management-backend" \
+            --settings WEBSITES_CONTAINER_START_TIME_LIMIT=600 SPRING_JPA_OPEN_IN_VIEW=false
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
