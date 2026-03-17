@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  sonar:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,18 +29,37 @@ jobs:
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          restore-keys: |
+            ${{ runner.os }}-m2-
 
-      - name: Build with Maven (skip tests)
-        run: mvn clean verify -DskipTests
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        with:
-          args: >
-            -Dsonar.organization=3-BCADevOps
-            -Dsonar.projectKey=3-BCADevOps_car-pooling-management-backend
+      - name: Ensure SonarCloud project exists
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          set -e
+          create_response=$(curl -sS -u "${SONAR_TOKEN}:" -X POST "https://sonarcloud.io/api/projects/create" \
+            -d "organization=3-BCADevOps" \
+            -d "project=car-pooling-management-backend" \
+            -d "name=car-pooling-management-backend" || true)
 
+          echo "$create_response"
 
+          if echo "$create_response" | grep -q '"errors"'; then
+            if echo "$create_response" | grep -qi 'already exists'; then
+              echo "SonarCloud project already exists, continuing."
+            else
+              echo "Failed to create SonarCloud project."
+              exit 1
+            fi
+          fi
+
+      - name: Build and analyze with Maven Sonar plugin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./mvnw -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -DskipTests \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.organization=3-BCADevOps \
+            -Dsonar.projectKey=3-BCADevOps_car-pooling-management-backend
