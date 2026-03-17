@@ -48,6 +48,48 @@ Render will provision:
 
 When deployed via `render.yaml`, Render injects database connection variables used by the `render` profile.
 
+## Deploy on Azure App Service (Linux, Java 17)
+
+If Azure logs show `Could not find an executable jar in /home/site/wwwroot`, App Service is starting the default parking page because your JAR is missing or startup command does not match the deployed file name.
+
+This project now builds a stable artifact name:
+- `target/app.jar`
+
+### Required App Service settings
+
+In **Configuration -> Application settings**, add:
+- `SPRING_PROFILES_ACTIVE=render`
+- `SPRING_DATASOURCE_HOST=<your_db_host>`
+- `SPRING_DATASOURCE_PORT=<your_db_port>`
+- `SPRING_DATASOURCE_DB=<your_db_name>`
+- `SPRING_DATASOURCE_USERNAME=<your_db_user>`
+- `SPRING_DATASOURCE_PASSWORD=<your_db_password>`
+
+In **Configuration -> General settings -> Startup Command**, set:
+
+```bash
+java -Dspring.profiles.active=render -jar /home/site/wwwroot/app.jar --server.port=$PORT
+```
+
+### Build and deploy artifact
+
+```bash
+./mvnw clean package -DskipTests
+```
+
+Deploy `target/app.jar` to `/home/site/wwwroot/app.jar` (Zip Deploy or CI/CD).
+
+### Verify successful startup in logs
+
+Look for these lines:
+- `Running STARTUP_COMMAND: java -Dspring.profiles.active=render -jar /home/site/wwwroot/app.jar --server.port=$PORT`
+- `Tomcat started on port 80`
+- `Started DemoApplication`
+
+Notes:
+- `Application Insights` timeout warnings in your log are not the root cause of app startup failure.
+- The critical failure is missing executable JAR or mismatched startup command.
+
 ## API Endpoints
 
 ### Users
