@@ -68,8 +68,10 @@ In **Configuration -> Application settings**, add:
 In **Configuration -> General settings -> Startup Command**, set:
 
 ```bash
-java -Dspring.profiles.active=render -jar /home/site/wwwroot/app.jar --server.port=$PORT
+java -Dspring.profiles.active=render -jar /home/site/wwwroot/app.jar
 ```
+
+Do not append `--server.port=$PORT` in App Service startup command. App Service can pass this as a literal string in some contexts, and your app already reads the port from `server.port=${PORT:8080}`.
 
 ### Build and deploy artifact
 
@@ -82,7 +84,7 @@ Deploy `target/app.jar` to `/home/site/wwwroot/app.jar` (Zip Deploy or CI/CD).
 ### Verify successful startup in logs
 
 Look for these lines:
-- `Running STARTUP_COMMAND: java -Dspring.profiles.active=render -jar /home/site/wwwroot/app.jar --server.port=$PORT`
+- `Running STARTUP_COMMAND: java -Dspring.profiles.active=render -jar /home/site/wwwroot/app.jar`
 - `Tomcat started on port 80`
 - `Started DemoApplication`
 
